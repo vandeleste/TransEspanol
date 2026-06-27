@@ -51,69 +51,34 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
         for (int i=0;i<Data_OpenUtau.Length ;i++){
             File.AppendAllText(path_log,Data_OpenUtau[i]+"\n");
         }
-
-        
-// Parte una nota en dos
-        //Busca la nota
-        int j=0;
-        while(j<Data_OpenUtau.Length && !Data_OpenUtau[j].StartsWith("[#0000]")){
-            j++;
-        }
-        if(j>=Data_OpenUtau.Length){
-            File.AppendAllText(path_log,"NO encontro nota\n");
-        }
-        else{
-            Data_OpenUtau=PartirEnDos(args,j,"a","o",5,1);
-        }
-
-/*
-    recorre nota por nota//SIN TERMINAR
-        lee Lyric=
-        if(si coincide con el diccionario_CV o diccionary_C){
-                cambio
-        }else{
-            if(ultima letra es r s n l){se parteEndos(letra,3,1)}
-            if(si coincide con el diccionario CCV o diccionario diptongo){
-            cambio por lo del diccionario
-            parto nota}
-        }
-
-    int ind=0;//ind=[#0...]    
-    while(ind<Data_OpenUtau.Length && !Data_OpenUtau[j].StartsWith("[#0")){
-        string data=Data_OpenUtau[ind+1].Substring(6)//obtiene lo siguente de Lyric=
-        if(dictionary_CV.ContainsKey(data)||dictionary_C.ContainsKey(data)){//NO Tengo que partir
-            string data=Data_OpenUtau[ind+1].Substring(6);
-            if (dictionary_CV.ContainsKey(data)){
-                Data_OpenUtau[ind+1]="Lyric="+dictionary_CV[data];
-            };
-            if (dictionary_C.ContainsKey(data)){
-                Data_OpenUtau[ind+1]="Lyric="+dictionary_CV[data];
+        int ind=0;//ind=[#0...]    
+        while(ind<Data_OpenUtau.Length && !Data_OpenUtau[ind].StartsWith("[#0")){
+            string data=Data_OpenUtau[ind+1].Substring(6);//obtiene lo siguente de Lyric=
+            if(dictionary_CV.ContainsKey(data)||diccionary_C.ContainsKey(data)){//NO Tengo que partir
+                if (dictionary_CV.ContainsKey(data)){
+                    Data_OpenUtau[ind+1]="Lyric="+dictionary_CV[data];
+                };
+                if (diccionary_C.ContainsKey(data)){
+                    Data_OpenUtau[ind+1]="Lyric="+diccionary_C[data];
+                }
+            }else{
+                if(Data_OpenUtau[ind+2].Contains("l")||Data_OpenUtau[ind+2].Contains("r")||Data_OpenUtau[ind+2].Contains("n")||Data_OpenUtau[ind+2].Contains("s")){
+                    if(Data_OpenUtau[ind+2].Contains("l")){Data_OpenUtau=PartirEnDos(args,ind,data,"l",3,1);}
+                    if(Data_OpenUtau[ind+2].Contains("r")){Data_OpenUtau=PartirEnDos(args,ind,data,"r",3,1);}
+                    if(Data_OpenUtau[ind+2].Contains("s")){Data_OpenUtau=PartirEnDos(args,ind,data,"s",3,1);}
+                    if(Data_OpenUtau[ind+2].Contains("n")){Data_OpenUtau=PartirEnDos(args,ind,data,"n",3,1);}
+                }
+                if(diccionary_CCV.ContainsKey(data)){
+                    string[] Lyrics=Data_OpenUtau[ind+2].Split(",");
+                    Data_OpenUtau=PartirEnDos(args,ind,Lyrics[0],Lyrics[1],1,2);
+                }
+                if(diccionary_diptongo.ContainsKey(data)){
+                    string[] Lyrics=Data_OpenUtau[ind+2].Split(",");
+                    Data_OpenUtau=PartirEnDos(args,ind,Lyrics[0],Lyrics[1],1,2);
+                }
             }
-        }else{
-            if(Data_OpenUtau[ind+2].Contains("l")||Data_OpenUtau[ind+2].Contains("r")||Data_OpenUtau[ind+2].Contains("n")||Data_OpenUtau[ind+2].Contains("s")){
-                if(Data_OpenUtau[ind+2].Contains("l")){Data_OpenUtau=PartirEnDos(args,ind,data,"l",3,1);}
-                if(Data_OpenUtau[ind+2].Contains("r")){Data_OpenUtau=PartirEnDos(args,ind,data,"r",3,1);}
-                if(Data_OpenUtau[ind+2].Contains("s")){Data_OpenUtau=PartirEnDos(args,ind,data,"s",3,1);}
-                if(Data_OpenUtau[ind+2].Contains("n")){Data_OpenUtau=PartirEnDos(args,ind,data,"n",3,1);}
-            }
-            if(dictionary_CCV.ContainsKey(data)){
-                Data_OpenUtau[ind+2]="Lyric="+dictionary_CCV[data]
-                
-
-                Data_OpenUtau=PartirEnDos(args,ind,"a","o",1,1);
-            }
-            if(dictionary_diptongo.ContainsKey(data)){
-                Data_OpenUtau=PartirEnDos(args,ind,"a","o",1,1);
-            }
+            ind++;
         }
-        ind++;
-        }
-
-*/
-
-
-
-
         //Guardo los cambios
         File.WriteAllLines(path_temp,Data_OpenUtau);
         File.AppendAllText(path_log,"Finaliza Plugin\n");
