@@ -3,7 +3,7 @@ class Program{
         string path_temp=args[0];
         string path_log=AppContext.BaseDirectory+"log_plugin.txt";//Ubicacion del log_plugin.txt
         string[] Data_OpenUtau = File.ReadAllLines(path_temp);
-        var diccionary_CCV =new Dictionary<string,string>(){
+        var dictionary_CCV =new Dictionary<string,string>(){
             {"bra","b,ra"},{"bre","b,re"},{"bri","b,ri"},{"bro","b,ro"},{"bru","b,ru"},
             {"bla","b,la"},{"ble","b,le"},{"bli","b,li"},{"blo","b,lo"},{"blu","b,lu"},
             {"pra","p,ra"},{"pre","p,re"},{"pri","p,ri"},{"pro","p,ro"},{"pru","p,ru"},
@@ -15,7 +15,7 @@ class Program{
             {"fra","f,ra"},{"fre","f,re"},{"fri","f,ri"},{"fro","f,ro"},{"fru","f,ru"},
             {"rra","r,ra"},{"rre","r,re"},{"rri","r,ri"},{"rro","r,ro"},{"rru","r,ru"},
         };
-        var diccionary_diptongo =new Dictionary<string,string>(){
+        var dictionary_diptongo =new Dictionary<string,string>(){
             {"cia","si,a"},{"cie","si,e"},{"cio","si,o"},
             {"gia","gi,a"},{"gie","gi,e"},{"gio","gi,o"},
             {"bia","bi,a"},{"bie","bi,e"},{"bio","bi,o"},
@@ -25,7 +25,7 @@ class Program{
             {"gua","gu,a"},{"gue","gu,e"},{"gui","gu,i"},
             {"cua","ku,a"},{"cue","ku,e"},{"cui","ku,i"},
         };
-        var diccionary_C=new Dictionary<string,string>(){
+        var dictionary_C=new Dictionary<string,string>(){
             {"b","ba"},{"p","pa"},{"t","te"},{"c","ka"},{"g","ge"},{"f","fe"},{"r","ra"},
         };
         var dictionary_CV =new Dictionary<string, string>(){
@@ -45,36 +45,62 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
         */
         };
         //Creo log
-        File.WriteAllText(path_log,"Plugin ejecutado.\n");
+        File.WriteAllText(path_log,"Plugin iniciado.\n");
 
         //muestro los datos del temp
         for (int i=0;i<Data_OpenUtau.Length ;i++){
             File.AppendAllText(path_log,Data_OpenUtau[i]+"\n");
         }
+        File.AppendAllText(path_log,"Comienza ejecucion del programa\n");
         int ind=0;//ind=[#0...]    
-        while(ind<Data_OpenUtau.Length && !Data_OpenUtau[ind].StartsWith("[#0")){
-            string data=Data_OpenUtau[ind+1].Substring(6);//obtiene lo siguente de Lyric=
-            if(dictionary_CV.ContainsKey(data)||diccionary_C.ContainsKey(data)){//NO Tengo que partir
-                if (dictionary_CV.ContainsKey(data)){
-                    Data_OpenUtau[ind+1]="Lyric="+dictionary_CV[data];
-                };
-                if (diccionary_C.ContainsKey(data)){
-                    Data_OpenUtau[ind+1]="Lyric="+diccionary_C[data];
-                }
-            }else{
-                if(Data_OpenUtau[ind+2].Contains("l")||Data_OpenUtau[ind+2].Contains("r")||Data_OpenUtau[ind+2].Contains("n")||Data_OpenUtau[ind+2].Contains("s")){
-                    if(Data_OpenUtau[ind+2].Contains("l")){Data_OpenUtau=PartirEnDos(args,ind,data,"l",3,1);}
-                    if(Data_OpenUtau[ind+2].Contains("r")){Data_OpenUtau=PartirEnDos(args,ind,data,"r",3,1);}
-                    if(Data_OpenUtau[ind+2].Contains("s")){Data_OpenUtau=PartirEnDos(args,ind,data,"s",3,1);}
-                    if(Data_OpenUtau[ind+2].Contains("n")){Data_OpenUtau=PartirEnDos(args,ind,data,"n",3,1);}
-                }
-                if(diccionary_CCV.ContainsKey(data)){
-                    string[] Lyrics=Data_OpenUtau[ind+2].Split(",");
+        while(ind<Data_OpenUtau.Length){
+            if(Data_OpenUtau[ind].StartsWith("[#0")){
+                File.AppendAllText(path_log,"Numero de Nota:"+Data_OpenUtau[ind]+"\n");//EJ:[#0001]
+                File.AppendAllText(path_log,Data_OpenUtau[ind+2]+"\n");//Lyric
+                string data=Data_OpenUtau[ind+2].Substring(6);//obtiene lo siguente de Lyric=
+                
+                if (dictionary_CV.ContainsKey(data)){//TIPO CV
+                    File.AppendAllText(path_log,"Data: "+data+" Tipo:CV\n");
+                    Data_OpenUtau[ind+2]="Lyric="+dictionary_CV[data];
+                    if(data.StartsWith("l")){
+                        data=dictionary_CV[data];//Cambia lV por o r,V Ej: lo->o r,o
+                        string[] Lyrics=Data_OpenUtau[ind+2].Split(",");
+                        Data_OpenUtau=PartirEnDos(args,ind,Lyrics[0],Lyrics[1],1,2);
+                        //Vuelve a recorrer desde la primera nota partida
+                        ind=ind-1;
+                    }
+
+                }else if (dictionary_C.ContainsKey(data)){//TIPO C
+                    File.AppendAllText(path_log,"Data: "+data+" Tipo:C\n");
+                    Data_OpenUtau[ind+2]="Lyric="+dictionary_C[data];
+
+                }else if(data.EndsWith("l")||data.EndsWith("r")||data.EndsWith("s")||data.EndsWith("n")){
+                    File.AppendAllText(path_log,"Termina en 'l' 'r' 's' 'n'\n");
+                    if(data.EndsWith("l")){Data_OpenUtau=PartirEnDos(args,ind,data.Substring(0,data.Length-1),"l",3,1);}
+                    if(data.EndsWith("r")){Data_OpenUtau=PartirEnDos(args,ind,data.Substring(0,data.Length-1),"r",3,1);}
+                    if(data.EndsWith("s")){Data_OpenUtau=PartirEnDos(args,ind,data.Substring(0,data.Length-1),"s",3,1);}
+                    if(data.EndsWith("n")){Data_OpenUtau=PartirEnDos(args,ind,data.Substring(0,data.Length-1),"n",3,1);}
+                    //Vuelve a recorrer desde la primera nota partida
+                    ind=ind-1;
+                }else if(dictionary_CCV.ContainsKey(data)){
+                    File.AppendAllText(path_log,"Data: "+data+" Tipo:CCV\n");
+                    data=dictionary_CCV[data];//Cambia CCV por C,CV Ej: bra->b,ra
+                    string[] Lyrics=data.Split(",");
                     Data_OpenUtau=PartirEnDos(args,ind,Lyrics[0],Lyrics[1],1,2);
-                }
-                if(diccionary_diptongo.ContainsKey(data)){
-                    string[] Lyrics=Data_OpenUtau[ind+2].Split(",");
+                    //Vuelve a recorrer desde la primera nota partida
+                    ind=ind-1;
+
+                }else if(dictionary_diptongo.ContainsKey(data)){
+                    File.AppendAllText(path_log,"Data: "+data+" Tipo:diptongo\n");
+                    data=dictionary_diptongo[data];// cambio CVV por CV,V Ej: dia->di,a
+                    string[] Lyrics=data.Split(",");
+                    File.AppendAllText(path_log,"Se parten en "+Lyrics[0]+"y"+Lyrics[1]+"\n");
                     Data_OpenUtau=PartirEnDos(args,ind,Lyrics[0],Lyrics[1],1,2);
+                    //Vuelve a recorrer desde la primera nota partida
+                    ind=ind-1;
+
+                }else{
+                    File.AppendAllText(path_log,"Data: "+data+" Tipo:No se hace nada\n");
                 }
             }
             ind++;
@@ -82,6 +108,11 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
         //Guardo los cambios
         File.WriteAllLines(path_temp,Data_OpenUtau);
         File.AppendAllText(path_log,"Finaliza Plugin\n");
+        //muestro los datos del temp
+        File.AppendAllText(path_log,"Datos cambiados\n");
+        for (int i=0;i<Data_OpenUtau.Length ;i++){
+            File.AppendAllText(path_log,Data_OpenUtau[i]+"\n");
+        }
     }
 
     static string[] PartirEnDos(string[]args,int j,string Lyric_1,string Lyric_2,int x,int y){//PartirEnDos(dir temp,indice de la nota,Lyric_1,Lyric_2,x,y) proporcion x:y cada "x" elementos hay "y" elementos, x=primera nota y=segunda nota
