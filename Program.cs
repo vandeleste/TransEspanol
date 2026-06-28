@@ -64,29 +64,28 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
                     Data_OpenUtau[ind+2]="Lyric="+dictionary_CV[data];
                     if(data.StartsWith("l")){
                         data=dictionary_CV[data];//Cambia lV por o r,V Ej: lo->o r,o
-                        string[] Lyrics=Data_OpenUtau[ind+2].Split(",");
-                        Data_OpenUtau=PartirEnDos(args,ind,Lyrics[0],Lyrics[1],1,2);
-                        //Vuelve a recorrer desde la primera nota partida
-                        ind=ind-1;
+                        string[] Lyrics=data.Split(",");
+                        Data_OpenUtau=PartirEnDos(Data_OpenUtau,ind,Lyrics[0],Lyrics[1],1,3);
+                        File.AppendAllText(path_log,"Lo parte en:"+Lyrics[0]+" y en:"+Lyrics[1]+"\n\n");
+                        //NO Vuelve a recorrer desde la primera nota partida
                     }
 
                 }else if (dictionary_C.ContainsKey(data)){//TIPO C
                     File.AppendAllText(path_log,"Data: "+data+" Tipo:C\n");
                     Data_OpenUtau[ind+2]="Lyric="+dictionary_C[data];
 
-                }else if(data.EndsWith("l")||data.EndsWith("r")||data.EndsWith("s")||data.EndsWith("n")){
+                }else if(data.Length>1 &&    (data.EndsWith("l")||data.EndsWith("r")||data.EndsWith("s")||data.EndsWith("n"))){
                     File.AppendAllText(path_log,"Termina en 'l' 'r' 's' 'n'\n");
-                    if(data.EndsWith("l")){Data_OpenUtau=PartirEnDos(args,ind,data.Substring(0,data.Length-1),"l",3,1);}
-                    if(data.EndsWith("r")){Data_OpenUtau=PartirEnDos(args,ind,data.Substring(0,data.Length-1),"r",3,1);}
-                    if(data.EndsWith("s")){Data_OpenUtau=PartirEnDos(args,ind,data.Substring(0,data.Length-1),"s",3,1);}
-                    if(data.EndsWith("n")){Data_OpenUtau=PartirEnDos(args,ind,data.Substring(0,data.Length-1),"n",3,1);}
+                    Data_OpenUtau=PartirEnDos(Data_OpenUtau,ind,data.Substring(0,data.Length-1),data.Substring(data.Length-1),3,1);
+                    File.AppendAllText(path_log,"Lo parte en:"+data.Substring(0,data.Length-1)+" y en:"+data.Substring(data.Length-1)+"\n\n");
                     //Vuelve a recorrer desde la primera nota partida
                     ind=ind-1;
                 }else if(dictionary_CCV.ContainsKey(data)){
                     File.AppendAllText(path_log,"Data: "+data+" Tipo:CCV\n");
                     data=dictionary_CCV[data];//Cambia CCV por C,CV Ej: bra->b,ra
                     string[] Lyrics=data.Split(",");
-                    Data_OpenUtau=PartirEnDos(args,ind,Lyrics[0],Lyrics[1],1,2);
+                    Data_OpenUtau=PartirEnDos(Data_OpenUtau,ind,Lyrics[0],Lyrics[1],1,2);
+                    File.AppendAllText(path_log,"Lo parte en:"+Lyrics[0]+" y en:"+Lyrics[1]+"\n\n");
                     //Vuelve a recorrer desde la primera nota partida
                     ind=ind-1;
 
@@ -95,12 +94,13 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
                     data=dictionary_diptongo[data];// cambio CVV por CV,V Ej: dia->di,a
                     string[] Lyrics=data.Split(",");
                     File.AppendAllText(path_log,"Se parten en "+Lyrics[0]+"y"+Lyrics[1]+"\n");
-                    Data_OpenUtau=PartirEnDos(args,ind,Lyrics[0],Lyrics[1],1,2);
+                    Data_OpenUtau=PartirEnDos(Data_OpenUtau,ind,Lyrics[0],Lyrics[1],1,2);
+                    File.AppendAllText(path_log,"Lo parte en:"+Lyrics[0]+" y en:"+Lyrics[1]+"\n\n");
                     //Vuelve a recorrer desde la primera nota partida
                     ind=ind-1;
 
                 }else{
-                    File.AppendAllText(path_log,"Data: "+data+" Tipo:No se hace nada\n");
+                    File.AppendAllText(path_log,"Data: "+data+" Tipo:No se hace nada\n\n");
                 }
             }
             ind++;
@@ -115,11 +115,7 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
         }
     }
 
-    static string[] PartirEnDos(string[]args,int j,string Lyric_1,string Lyric_2,int x,int y){//PartirEnDos(dir temp,indice de la nota,Lyric_1,Lyric_2,x,y) proporcion x:y cada "x" elementos hay "y" elementos, x=primera nota y=segunda nota
-        string path_temp=args[0];
-        string path_log=AppContext.BaseDirectory+"log_plugin.txt";//Ubicacion del log_plugin.txt
-        string[] Data_OpenUtau = File.ReadAllLines(path_temp);
-        //
+    static string[] PartirEnDos(string[]Data_OpenUtau,int j,string Lyric_1,string Lyric_2,int x,int y){//PartirEnDos(dir temp,indice de la nota,Lyric_1,Lyric_2,x,y) proporcion x:y cada "x" elementos hay "y" elementos, x=primera nota y=segunda nota
         Data_OpenUtau[j+2]="Lyric="+Lyric_1;
         //Cambia la longitud de la nota
         int length_note=int.Parse(Data_OpenUtau[j+1].Substring(7));//Length=480
@@ -149,6 +145,7 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
         
         return Data_OpenUtau;
     }
+    
 }
 
 /*
