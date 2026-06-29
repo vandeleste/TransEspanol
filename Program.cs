@@ -66,6 +66,7 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
                         data=dictionary_CV[data];//Cambia lV por o r,V Ej: lo->o r,o
                         string[] Lyrics=data.Split(",");
                         Data_OpenUtau=PartirEnDos(Data_OpenUtau,ind,Lyrics[0],Lyrics[1],1,3);
+                        Data_OpenUtau=Preutterance(Data_OpenUtau,ind,1);//NO FUNCIONA
                         File.AppendAllText(path_log,"Lo parte en:"+Lyrics[0]+" y en:"+Lyrics[1]+"\n\n");
                         //NO Vuelve a recorrer desde la primera nota partida
                     }
@@ -74,8 +75,8 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
                     File.AppendAllText(path_log,"Data: "+data+" Tipo:C\n");
                     Data_OpenUtau[ind+2]="Lyric="+dictionary_C[data];
 
-                }else if(data.Length>1 &&    (data.EndsWith("l")||data.EndsWith("r")||data.EndsWith("s")||data.EndsWith("n"))){
-                    File.AppendAllText(path_log,"Termina en 'l' 'r' 's' 'n'\n");
+                }else if(data.Length>1 &&    (data.EndsWith("m")||data.EndsWith("l")||data.EndsWith("r")||data.EndsWith("s")||data.EndsWith("n"))){//agregar que no debe de existir el caracter " " para no leer a "o r" "a r",etc
+                    File.AppendAllText(path_log,"Termina en 'm' 'l' 'r' 's' 'n'\n");
                     Data_OpenUtau=PartirEnDos(Data_OpenUtau,ind,data.Substring(0,data.Length-1),data.Substring(data.Length-1),3,1);
                     File.AppendAllText(path_log,"Lo parte en:"+data.Substring(0,data.Length-1)+" y en:"+data.Substring(data.Length-1)+"\n\n");
                     //Vuelve a recorrer desde la primera nota partida
@@ -114,15 +115,28 @@ ma me mi mo mu|pa pe pi po pu|sa se si so su|ta te ti to tu|na ne ni no nu|ga ge
             File.AppendAllText(path_log,Data_OpenUtau[i]+"\n");
         }
     }
-
+    static string[] Preutterance(string[]Data_OpenUtau,int ind, int preutterance){//cambia el parametro preutterance
+        string path_log=AppContext.BaseDirectory+"log_plugin.txt";
+        int k=ind+1;
+        while(k<Data_OpenUtau.Length && !Data_OpenUtau[k].StartsWith("[#") && !Data_OpenUtau[k].StartsWith("PreUtterance=")){
+            k++;
+        }
+        if (Data_OpenUtau[k].StartsWith("PreUtterance=")){
+            Data_OpenUtau[k]="PreUtterance="+preutterance;
+            File.AppendAllText(path_log,Data_OpenUtau[k]+"\n");
+        }else{
+            File.AppendAllText(path_log,"\n"+"NO ENCONTRO PreUtterance="+"\n");
+        }
+        return Data_OpenUtau;
+    }
     static string[] PartirEnDos(string[]Data_OpenUtau,int j,string Lyric_1,string Lyric_2,int x,int y){//PartirEnDos(dir temp,indice de la nota,Lyric_1,Lyric_2,x,y) proporcion x:y cada "x" elementos hay "y" elementos, x=primera nota y=segunda nota
         Data_OpenUtau[j+2]="Lyric="+Lyric_1;
         //Cambia la longitud de la nota
         int length_note=int.Parse(Data_OpenUtau[j+1].Substring(7));//Length=480
         Data_OpenUtau[j+1]="Length="+x*length_note/(x+y);
-        //Ubicacion de la proxima data.Ej [#0xxx]
+        //Ubicacion de la proxima data.Ej [#xxxx]
         int k=j+1;
-        while(k<Data_OpenUtau.Length && !Data_OpenUtau[k].StartsWith("[#0")){
+        while(k<Data_OpenUtau.Length && !Data_OpenUtau[k].StartsWith("[#")){
             k++;
         }
         //Guarda en un array aux la data
